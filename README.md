@@ -6,7 +6,8 @@ This repository stores the Beamer presentation for:
 
 Files:
 
+- `presentations/crew-pairing/crew_pairing_5min_beamer.pdf`: 5-minute presentation PDF
+- `presentations/crew-pairing/crew_pairing_5min_beamer.tex`: editable 5-minute Beamer source with recording parole in comments
 - `presentations/crew-pairing/crew_pairing_speech_beamer.pdf`: main 3-slide presentation PDF
 - `presentations/crew-pairing/crew_pairing_speech_beamer.tex`: editable Beamer source with speech notes in comments
 - `presentations/crew-pairing/crew_pairing_speech_compact.pdf`: compact backup PDF
-
