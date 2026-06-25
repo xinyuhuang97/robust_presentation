@@ -13,3 +13,5 @@ Files:
 - `presentations/crew-pairing/crew_pairing_speech_beamer.pdf`: main 3-slide presentation PDF
 - `presentations/crew-pairing/crew_pairing_speech_beamer.tex`: editable Beamer source with speech notes in comments
 - `presentations/crew-pairing/crew_pairing_speech_compact.pdf`: compact backup PDF
+- `posters/crew-pairing/robust_crew_pairing_poster_a1_academic.pdf`: A1 portrait academic poster
+- `posters/crew-pairing/robust_crew_pairing_poster_a1_academic.tex`: editable A1 poster source

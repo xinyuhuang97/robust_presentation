@@ -1,0 +1,424 @@
+\documentclass[final]{beamer}
+
+\usepackage[size=a1,orientation=portrait,scale=1.15]{beamerposter}
+\usepackage{amsmath,amssymb,array,booktabs}
+\usepackage{tikz}
+\usetikzlibrary{arrows.meta,positioning,calc}
+
+\definecolor{navy}{RGB}{20,58,90}
+\definecolor{steel}{RGB}{54,96,128}
+\definecolor{deepgreen}{RGB}{37,112,84}
+\definecolor{brick}{RGB}{146,57,53}
+\definecolor{gold}{RGB}{183,128,32}
+\definecolor{ink}{RGB}{30,36,42}
+\definecolor{pale}{RGB}{246,248,250}
+\definecolor{bluepale}{RGB}{232,241,248}
+\definecolor{greenpale}{RGB}{231,244,239}
+\definecolor{redpale}{RGB}{252,238,236}
+
+\setbeamercolor{headline}{bg=navy,fg=white}
+\setbeamercolor{block title}{bg=steel,fg=white}
+\setbeamercolor{block body}{bg=white,fg=ink}
+\setbeamercolor{alertblock title}{bg=deepgreen,fg=white}
+\setbeamercolor{alertblock body}{bg=greenpale,fg=ink}
+\setbeamercolor{exampleblock title}{bg=brick,fg=white}
+\setbeamercolor{exampleblock body}{bg=white,fg=ink}
+\setbeamertemplate{navigation symbols}{}
+
+\setbeamertemplate{headline}{
+  \begin{beamercolorbox}[wd=\paperwidth,ht=5.4cm,dp=0.65cm,leftskip=1.55cm,rightskip=1.55cm]{headline}
+    \begin{minipage}[c]{0.76\paperwidth}
+      {\fontsize{34}{39}\selectfont\bfseries Incremental Data-Driven Robust Crew Pairing Optimization}\\[0.12cm]
+      {\fontsize{24}{29}\selectfont under Evolving Delay Uncertainty}\\[0.32cm]
+      {\fontsize{16}{19}\selectfont Xinyu HUANG \quad Department of Industrial and Systems Engineering, The Hong Kong Polytechnic University}
+    \end{minipage}
+    \hfill
+    \begin{minipage}[c]{0.17\paperwidth}
+      \raggedleft
+      {\fontsize{11.5}{14}\selectfont
+      \textbf{Keywords}\\
+      air crew pairing\\
+      robust optimization\\
+      C\&CG and column generation\\
+      re-optimization}
+    \end{minipage}
+  \end{beamercolorbox}
+}
+
+\setbeamerfont{block title}{size=\normalsize,series=\bfseries}
+\setbeamerfont{block body}{size=\small}
+
+\setbeamertemplate{block begin}{
+  \vskip0.20ex
+  \begin{beamercolorbox}[wd=\linewidth,rounded=false,leftskip=0.65em,rightskip=0.65em,sep=0.36em]{block title}
+    \usebeamerfont*{block title}\insertblocktitle
+  \end{beamercolorbox}
+  \begin{beamercolorbox}[wd=\linewidth,rounded=false,leftskip=0.65em,rightskip=0.65em,sep=0.48em]{block body}
+}
+\setbeamertemplate{block end}{\end{beamercolorbox}\vskip0.28ex}
+
+\setbeamertemplate{alertblock begin}{
+  \vskip0.20ex
+  \begin{beamercolorbox}[wd=\linewidth,rounded=false,leftskip=0.65em,rightskip=0.65em,sep=0.36em]{alertblock title}
+    \usebeamerfont*{block title}\insertblocktitle
+  \end{beamercolorbox}
+  \begin{beamercolorbox}[wd=\linewidth,rounded=false,leftskip=0.65em,rightskip=0.65em,sep=0.48em]{alertblock body}
+}
+\setbeamertemplate{alertblock end}{\end{beamercolorbox}\vskip0.28ex}
+
+\setbeamertemplate{exampleblock begin}{
+  \vskip0.20ex
+  \begin{beamercolorbox}[wd=\linewidth,rounded=false,leftskip=0.65em,rightskip=0.65em,sep=0.36em]{exampleblock title}
+    \usebeamerfont*{block title}\insertblocktitle
+  \end{beamercolorbox}
+  \begin{beamercolorbox}[wd=\linewidth,rounded=false,leftskip=0.65em,rightskip=0.65em,sep=0.48em]{exampleblock body}
+}
+\setbeamertemplate{exampleblock end}{\end{beamercolorbox}\vskip0.28ex}
+
+\newcommand{\tightitem}{\setlength{\itemsep}{0.10em}\setlength{\parsep}{0pt}\setlength{\topsep}{0pt}}
+\newcommand{\key}[1]{\textcolor{gold}{\bfseries #1}}
+\newcommand{\minihead}[1]{\vspace{0.12cm}\textbf{\textcolor{navy}{#1}}\par}
+\newcommand{\eqsmall}[1]{\begingroup\scriptsize #1\endgroup}
+
+\begin{document}
+\begin{frame}[t]
+\begin{minipage}[t]{0.968\textwidth}
+
+\begin{alertblock}{Research Question and Core Idea}
+How can an airline build crew pairings that remain operationally reliable when delay data keep changing? The project combines \textbf{quantile-based delay bounds}, \textbf{budgeted uncertainty}, a \textbf{two-stage robust crew pairing model}, and \textbf{incremental re-optimization} so that new disruption information updates the model without rebuilding the entire optimization process from zero.
+\end{alertblock}
+
+\begin{block}{Poster Map: From Delay Data to an Updated Robust Pairing Plan}
+\begin{center}
+\begin{tikzpicture}[
+  node distance=0.42cm,
+  box/.style={draw=steel,very thick,rounded corners=2pt,fill=bluepale,align=center,minimum height=1.12cm,text width=4.65cm},
+  green/.style={draw=deepgreen,very thick,rounded corners=2pt,fill=greenpale,align=center,minimum height=1.12cm,text width=4.65cm},
+  red/.style={draw=brick,very thick,rounded corners=2pt,fill=redpale,align=center,minimum height=1.12cm,text width=4.65cm},
+  arr/.style={-Latex,very thick,draw=navy}
+]
+  \node[box] (data) {Historical delay\\observations};
+  \node[box,right=of data] (bounds) {Empirical quantile\\bounds \(d_f\)};
+  \node[green,right=of bounds] (uncert) {Budgeted one-sided\\uncertainty set};
+  \node[green,right=of uncert] (model) {Two-stage robust\\crew pairing model};
+  \node[red,right=of model] (alg) {Nested C\&CG +\\column generation};
+  \node[red,right=of alg] (update) {Incremental\\re-optimization};
+  \draw[arr] (data) -- (bounds);
+  \draw[arr] (bounds) -- (uncert);
+  \draw[arr] (uncert) -- (model);
+  \draw[arr] (model) -- (alg);
+  \draw[arr] (alg) -- (update);
+\end{tikzpicture}
+\end{center}
+\end{block}
+
+\begin{columns}[t,totalwidth=\linewidth]
+
+\begin{column}{0.318\linewidth}
+
+\begin{block}{Operational Motivation}
+Crew pairing assigns flight legs to crew duties while satisfying coverage, connection, rest, duty-time, hotel, and cost rules. Nominal pairings can be cheap but fragile.
+\begin{itemize}\tightitem
+  \item An upstream flight delay may break a crew connection.
+  \item Recovery actions include waiting, swapping, or cancellation.
+  \item Rare disruption days are exactly the cases that drive operational risk.
+  \item Early arrivals usually create no penalty, so the uncertainty is naturally one-sided.
+\end{itemize}
+\begin{center}
+\begin{tikzpicture}[
+  node distance=0.28cm,
+  b/.style={draw,rounded corners=2pt,fill=bluepale,align=center,text width=3.25cm,minimum height=0.68cm},
+  r/.style={draw,rounded corners=2pt,fill=redpale,align=center,text width=3.25cm,minimum height=0.68cm},
+  arr/.style={-Latex,thick}
+]
+  \node[b] (p) {planned pairing};
+  \node[r,below=of p] (d) {delay realization};
+  \node[r,below=of d] (m) {connection violation};
+  \node[r,below=of m] (c) {recovery cost};
+  \draw[arr] (p) -- (d);
+  \draw[arr] (d) -- (m);
+  \draw[arr] (m) -- (c);
+\end{tikzpicture}
+\end{center}
+\end{block}
+
+\begin{block}{Literature Positioning}
+\scriptsize
+\renewcommand{\arraystretch}{1.18}
+\begin{tabular}{p{0.29\linewidth}p{0.36\linewidth}p{0.25\linewidth}}
+\toprule
+\textbf{Stream} & \textbf{Main idea} & \textbf{Use in this project}\\
+\midrule
+Robust optimization & Budgeted uncertainty controls the price of robustness \cite{bertsimas2004}. & Tunable conservatism\\
+Two-stage robust optimization & C\&CG adds worst-case scenarios iteratively \cite{zeng2013}. & Master and scenario cuts\\
+Mixed-integer recourse & Nested C\&CG handles integer recovery decisions \cite{zhao2012}. & Swap/cancel modeling\\
+Transportation robustness & One-sided interval sets and budget parameters appear in service network design \cite{wang2020}. & Delay-bound motivation\\
+\bottomrule
+\end{tabular}
+\end{block}
+
+\begin{exampleblock}{Research Gap}
+Existing work provides strong building blocks, but crew pairing under evolving disruption data needs the following combination:
+\begin{itemize}\tightitem
+  \item uncertainty bounds learned directly from historical observations;
+  \item one-sided treatment of delay rather than symmetric distribution fitting;
+  \item explicit mixed-integer recovery actions in the recourse stage;
+  \item a warm-startable structure for updated data and new operational cuts.
+\end{itemize}
+\textbf{Position:} the project connects data-driven uncertainty construction with robust crew pairing and incremental solution updates.
+\end{exampleblock}
+
+\begin{alertblock}{Data-Driven Uncertainty Set}
+For each flight component \(f\), historical delays \(x_f^1,\ldots,x_f^T\) define an empirical upper bound:
+\eqsmall{
+\[
+d_f=\operatorname{Quantile}_{\alpha}(x_f^1,\ldots,x_f^T),\qquad 0\leq \Delta_f\leq d_f.
+\]
+}
+The system does not assume all flights reach their worst delay simultaneously. A budget \(\Gamma\) allocates disruption intensity:
+\eqsmall{
+\[
+\widehat{\mathcal U}(\Gamma)=
+\left\{\Delta:\Delta_f=\gamma_f d_f,\;0\leq\gamma_f\leq 1,\;
+\sum_{f\in F}\gamma_f\leq\Gamma\right\}.
+\]
+}
+\minihead{Interpretation}
+\begin{itemize}\tightitem
+  \item \(d_f\) controls the severity of each flight-level disruption.
+  \item \(\Gamma\) controls network-wide conservatism.
+  \item Quantiles reduce the dilution of rare disruptions by many nominal observations.
+\end{itemize}
+\end{alertblock}
+
+\end{column}
+
+\begin{column}{0.318\linewidth}
+
+\begin{block}{First-Stage Crew Pairing Model}
+Let \(P\) be the generated feasible pairing pool and \(a_{fp}=1\) if pairing \(p\) covers flight \(f\). The planning decision selects pairings before the delay scenario is known:
+\eqsmall{
+\[
+\min_x \sum_{p\in P}c_p x_p+
+\max_{\Delta\in\widehat{\mathcal U}(\Gamma)}R(x,\Delta)
+\]
+\[
+\sum_{p\in P}a_{fp}x_p=1\quad \forall f\in F,\qquad x_p\in\{0,1\}.
+\]
+}
+\minihead{Planning trade-off}
+\begin{itemize}\tightitem
+  \item Cheap pairings may have tight buffers and high disruption exposure.
+  \item Robust pairings spend more planned cost to reduce worst-case recovery cost.
+  \item The model internalizes this trade-off in the max-recouse term.
+\end{itemize}
+\end{block}
+
+\begin{block}{Second-Stage Recourse}
+Given selected pairings and a disruption allocation, excess delay on connection \((f,p)\) is:
+\eqsmall{
+\[
+z_{fp}\geq \gamma_f d_f-b_{fp}.
+\]
+}
+The airline then chooses between waiting, swapping, and cancellation:
+\eqsmall{
+\[
+\begin{aligned}
+R(x,\gamma)=\min\;&
+\sum_{(f,p)\in A}x_p\big(
+c^{wait}_{fp}w_{fp}
+C^{swap}_{fp}y^{swap}_{fp}
+C^{cancel}_{fp}y^{cancel}_{fp}\big)\\
+\text{s.t. }&
+w_{fp}\geq z_{fp}-M(y^{swap}_{fp}+y^{cancel}_{fp}),\\
+&y^{swap}_{fp}+y^{cancel}_{fp}\leq 1,\\
+&\sum x_p y^{swap}_{fp}\leq R^{swap},\quad
+\sum x_p y^{cancel}_{fp}\leq R^{cancel}.
+\end{aligned}
+\]
+}
+\minihead{Why this matters}
+The recourse is not just a continuous delay penalty. Swap and cancel decisions are binary, so direct strong-duality conversion of the full recourse problem is not valid.
+\end{block}
+
+\begin{exampleblock}{Worst-Case Separation}
+For a fixed first-stage solution \(\bar{x}\), the model seeks the delay allocation that creates the largest optimized recovery cost:
+\eqsmall{
+\[
+Q(\bar{x})=\max_{\gamma\in\widehat{\mathcal U}(\Gamma)}
+\min_{w,z,y^{swap},y^{cancel}}\{\text{recovery cost}\}.
+\]
+}
+Because the recourse contains integer actions, the project adopts a nested C\&CG idea:
+\begin{itemize}\tightitem
+  \item fix a candidate disruption allocation;
+  \item solve the mixed-integer recourse problem;
+  \item add the corresponding recovery pattern or scenario cut;
+  \item repeat until no violated worst-case pattern remains.
+\end{itemize}
+\end{exampleblock}
+
+\begin{alertblock}{Restricted Master with Scenario Cuts}
+At outer iteration \(k\), the master problem keeps a current pairing pool \(P^{(k)}\) and accumulated worst-case scenarios:
+\eqsmall{
+\[
+\min_{x,\theta}\sum_{p\in P^{(k)}}c_p x_p+\theta
+\]
+\[
+\theta\geq
+\sum_{(f,p)\in A}x_p
+\big(c^{wait}_{fp}w^s_{fp}+C^{swap}_{fp}y^{swap,s}_{fp}
++C^{cancel}_{fp}y^{cancel,s}_{fp}\big),\quad s=1,\ldots,k.
+\]
+}
+Each new scenario tightens the lower bound on robust recovery cost.
+\end{alertblock}
+
+\end{column}
+
+\begin{column}{0.318\linewidth}
+
+\begin{block}{Column Generation Layer}
+Crew pairing has too many feasible pairings to enumerate. Column generation searches for pairings with negative reduced cost under the current dual multipliers.
+\eqsmall{
+\[
+\operatorname{rc}(p)=
+c_p-\sum_{f\in F}a_{fp}\kappa_f+
+\sum_s \text{recourse-adjusted dual contribution}.
+\]
+}
+\begin{center}
+\begin{tikzpicture}[
+  node distance=0.32cm,
+  b/.style={draw=steel,very thick,rounded corners=2pt,fill=bluepale,align=center,text width=4.35cm,minimum height=0.78cm},
+  g/.style={draw=deepgreen,very thick,rounded corners=2pt,fill=greenpale,align=center,text width=4.35cm,minimum height=0.78cm},
+  arr/.style={-Latex,thick,draw=navy}
+]
+  \node[b] (rmp) {restricted master};
+  \node[b,below=of rmp] (sep) {worst-case separation};
+  \node[b,below=of sep] (price) {pricing problem};
+  \node[g,below=of price] (add) {add cuts and pairings};
+  \draw[arr] (rmp) -- (sep);
+  \draw[arr] (sep) -- (price);
+  \draw[arr] (price) -- (add);
+  \draw[arr] (add.west) to[out=180,in=180] (rmp.west);
+\end{tikzpicture}
+\end{center}
+\minihead{Termination}
+The algorithm stops when no negative-reduced-cost pairing remains and no violated robust scenario is generated, or when the optimality gap satisfies \(UB-LB\leq\varepsilon\).
+\end{block}
+
+\begin{block}{Incremental Re-Optimization}
+Let \(\mathcal U(\boldsymbol{\beta})\) be the uncertainty set parameterized by delay bounds \(\boldsymbol{\beta}\). If new data update these bounds, monotonicity gives two useful cases:
+\eqsmall{
+\[
+\boldsymbol{\beta}^{new}\leq \boldsymbol{\beta}^{old}
+\Rightarrow
+\mathcal U(\boldsymbol{\beta}^{new})\subseteq
+\mathcal U(\boldsymbol{\beta}^{old})
+\Rightarrow
+X(\boldsymbol{\beta}^{old})\subseteq X(\boldsymbol{\beta}^{new}).
+\]
+\[
+\boldsymbol{\beta}^{new}\geq \boldsymbol{\beta}^{old}
+\Rightarrow
+\mathcal U(\boldsymbol{\beta}^{new})\supseteq
+\mathcal U(\boldsymbol{\beta}^{old})
+\Rightarrow
+X(\boldsymbol{\beta}^{new})\subseteq X(\boldsymbol{\beta}^{old}).
+\]
+}
+\begin{itemize}\tightitem
+  \item If uncertainty shrinks, the old robust solution remains feasible and conservative.
+  \item If uncertainty expands, keep old cuts and add only new violated scenario cuts.
+  \item Operational cuts, such as restricted swap availability, can be inserted without restarting the full model.
+\end{itemize}
+\end{block}
+
+\begin{exampleblock}{Numerical Study Plan}
+\scriptsize
+\renewcommand{\arraystretch}{1.16}
+\begin{tabular}{p{0.29\linewidth}p{0.59\linewidth}}
+\toprule
+\textbf{Question} & \textbf{Evaluation design}\\
+\midrule
+Robustness price & Vary \(\Gamma\) and quantile level \(\alpha\); compare planned cost and worst-case recovery cost.\\
+Solution quality & Track lower bound, upper bound, optimality gap, number of cuts, and number of generated pairings.\\
+Re-optimization value & Compare incremental updating against solving the enlarged problem from scratch.\\
+Operational policy & Test swap and cancellation limits, including new cuts when an airline changes recovery availability.\\
+\bottomrule
+\end{tabular}
+\end{exampleblock}
+
+\begin{alertblock}{Expected Contributions}
+\begin{itemize}\tightitem
+  \item A one-sided empirical quantile uncertainty set for disruption-driven airline delay risk.
+  \item A two-stage robust crew pairing formulation with explicit waiting, swap, and cancellation recourse.
+  \item A nested C\&CG and column-generation solution framework for large pairing spaces.
+  \item An incremental update mechanism that reuses previous scenarios, cuts, and pairing columns as uncertainty evolves.
+\end{itemize}
+\end{alertblock}
+
+\begin{block}{References}
+\scriptsize
+\begin{thebibliography}{9}
+  \bibitem{bertsimas2004} Bertsimas, D., and Sim, M. (2004). The price of robustness. \emph{Operations Research}, 52(1), 35--53.
+  \bibitem{zhao2012} Zhao, L., and Zeng, B. (2012). An exact algorithm for two-stage robust optimization with mixed-integer recourse.
+  \bibitem{zeng2013} Zeng, B., and Zhao, L. (2013). Solving two-stage robust optimization problems using a column-and-constraint generation method. \emph{Operations Research Letters}, 41(5), 457--461.
+  \bibitem{wang2020} Wang, Z., and Qi, M. (2020). Robust service network design under demand uncertainty. \emph{Transportation Science}, 54(3), 676--689.
+\end{thebibliography}
+\end{block}
+
+\end{column}
+\end{columns}
+
+\begin{block}{Experiment and Validation Blueprint}
+\begin{columns}[T,totalwidth=\linewidth]
+\begin{column}{0.245\linewidth}
+\minihead{Inputs and instance design}
+\begin{itemize}\tightitem
+  \item flight set \(F\), feasible connection set \(A\), and initial pairing pool \(P^{(0)}\);
+  \item empirical delay samples \(x_f^1,\ldots,x_f^T\) for each flight component;
+  \item multiple instance scales to test how the nested C\&CG and pricing layers behave as the pairing space grows.
+\end{itemize}
+\end{column}
+\begin{column}{0.245\linewidth}
+\minihead{Parameter analysis}
+\begin{itemize}\tightitem
+  \item quantile level \(\alpha\): controls flight-level delay severity \(d_f\);
+  \item uncertainty budget \(\Gamma\): controls how many components can be simultaneously stressed;
+  \item resource limits \(R^{swap}\) and \(R^{cancel}\): represent operational recovery capacity.
+\end{itemize}
+\end{column}
+\begin{column}{0.245\linewidth}
+\minihead{Comparisons}
+\begin{itemize}\tightitem
+  \item nominal crew pairing without robust recovery;
+  \item robust model solved from scratch after data updates;
+  \item incremental re-optimization that reuses old cuts, pairings, and scenarios;
+  \item optional decomposition baselines, such as Benders-style cuts when applicable.
+\end{itemize}
+\end{column}
+\begin{column}{0.245\linewidth}
+\minihead{Reported metrics}
+\begin{itemize}\tightitem
+  \item planned pairing cost and worst-case recovery cost;
+  \item optimality gap \(UB-LB\), number of C\&CG cuts, and number of generated pairings;
+  \item runtime, re-optimization speedup, and robustness price as \(\Gamma\) increases.
+\end{itemize}
+\end{column}
+\end{columns}
+\vspace{0.12cm}
+\scriptsize
+\textbf{Expected interpretation.}
+The experimental section should show whether additional conservatism buys meaningful disruption protection, whether integer recovery decisions change the structure of selected pairings, and whether incremental updates reduce computation when new delay observations or new operational restrictions arrive.
+\end{block}
+
+\begin{alertblock}{Takeaway}
+The project treats crew pairing as a living robust optimization problem: delay observations define plausible disruption bounds, the robust model protects against high-impact scenarios, and the algorithm updates the solution as uncertainty and operational constraints evolve.
+\end{alertblock}
+
+\end{minipage}
+\end{frame}
+\end{document}
